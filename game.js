@@ -40,6 +40,7 @@ let enemySpeed = 180;
 let wave = 1;
 let waveText;
 let gameOver = false;
+let bossAlive = false;
 
 function preload() {
 
@@ -209,6 +210,25 @@ function spawnEnemy() {
     enemies.add(enemy);
 }
 
+function spawnBoss(scene) {
+
+    let boss = scene.physics.add.sprite(
+        640,
+        -100,
+        "zombie"
+    );
+
+    boss.setScale(1.2);
+
+    boss.health = 20;
+
+    boss.isBoss = true;
+
+    enemies.add(boss);
+
+    bossAlive = true;
+}
+
 function shootBullet() {
 
     if (enemies.getChildren().length === 0) {
@@ -276,7 +296,24 @@ function bulletHitEnemy(bullet, enemy) {
         Phaser.Math.Between(-30,30)
     );
     bullet.destroy();
-    enemy.destroy();
+
+    if(enemy.isBoss){
+
+        enemy.health--;
+
+        if(enemy.health <= 0){
+
+            bossAlive = false;
+
+            enemy.destroy();
+        }
+
+    }
+    else{
+
+        enemy.destroy();
+
+    }
 }
 
 function collectXP(player, gem) {
@@ -293,6 +330,7 @@ function collectXP(player, gem) {
 
         level++;
         wave++;
+        spawnBoss(game.scene.scenes[0]);
 
         waveText.setText(
             `Wave: ${wave}`
@@ -344,6 +382,32 @@ game.scene.scenes[0].physics.pause();
 
 
 function update() {
+
+    player.body.setVelocity(0);
+
+    if (cursors.left.isDown) {
+        player.body.setVelocityX(-playerSpeed);
+
+        player.setAngle(180);
+    }
+
+    else if (cursors.right.isDown) {
+        player.body.setVelocityX(playerSpeed);
+
+        player.setAngle(0);
+    }
+
+    else if (cursors.up.isDown) {
+        player.body.setVelocityY(-playerSpeed);
+
+        player.setAngle(-90);
+    }
+
+    else if (cursors.down.isDown) {
+        player.body.setVelocityY(playerSpeed);
+
+        player.setAngle(90);
+    }
 
     player.body.setVelocity(0);
 
